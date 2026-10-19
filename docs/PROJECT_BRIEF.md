@@ -52,6 +52,49 @@ Every table has `created_at` and `updated_at`. **Rows change after they are crea
 an order goes from `placed` to `delivered` or `cancelled`, customers update their
 profile, prices change, refunds arrive days later.
 
+### Source database: schema details and relationships
+
+The `app` schema contains seven source tables. All seven include
+`created_at` and `updated_at` timestamps, which are important for incremental
+extraction and detecting changes to previously loaded rows.
+
+| Table | Logical key | Important columns |
+|---|---|---|
+| `stores` | `store_id` | `store_name`, `city`, `country`, `currency`, `opened_at` |
+| `customers` | `customer_id` | `first_name`, `last_name`, `email`, `phone`, `city`, `signup_date` |
+| `products` | `product_id` | `product_name`, `category`, `unit_price_usd`, `is_active` |
+| `product_prices` | `product_id` + `valid_from` | `unit_price_usd`, `valid_from` |
+| `orders` | `order_id` | `customer_id`, `store_id`, `order_status`, `placed_at`, `delivered_at`, `promo_code` |
+| `order_items` | `order_item_id` | `order_id`, `product_id`, `quantity`, `unit_price`, `line_amount` |
+| `payments` | `payment_id` | `order_id`, `payment_method`, `payment_status`, `amount`, `paid_at` |
+
+**Logical relationships**
+
+- `orders.customer_id` -> `customers.customer_id`
+- `orders.store_id` -> `stores.store_id`
+- `order_items.order_id` -> `orders.order_id`
+- `order_items.product_id` -> `products.product_id`
+- `payments.order_id` -> `orders.order_id`
+- `product_prices.product_id` -> `products.product_id`
+
+These are logical relationships inferred from the column names and business
+meaning. The schema inspection returned no declared primary-key or foreign-key
+constraints in `app`; this does not mean the logical keys or relationships do
+not exist.
+
+**Implications for ingestion and quality**
+
+- Use the logical keys to identify records, and validate uniqueness rather than
+  assuming the database enforces it.
+- Use `created_at` and `updated_at` to identify new and changed records, while
+  accounting for updates that arrive after a record's creation day.
+- Preserve source values in Bronze. Apply deduplication, relationship checks,
+  and other cleaning in Silver.
+- For `product_prices`, retain historical price records; do not treat
+  `product_id` alone as a unique key for the history table.
+
+---
+
 ### Source 2: supplier stock files (CSV)
 
 Two suppliers send an end-of-day stock file (units on the shelf at 22:00, per product and
