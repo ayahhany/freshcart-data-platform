@@ -71,6 +71,7 @@ services:
 
 
   # -------------------------------------------------------- YOUR PLATFORM STARTS HER
+  # The Postgres Warehouse
   data-warehouse:
     image: postgres:16
     container_name: data-warehouse
@@ -82,6 +83,28 @@ services:
       - "5434:5432"
     volumes:
       - dw_data:/var/lib/postgresql/data
+
+
+  # Python initial full-load ingestion (run manually)
+  ingestion:
+    build: ./ingestion
+    profiles: ["manual"]
+    environment:
+      SOURCE_HOST: source-db
+      SOURCE_PORT: "5432"
+      SOURCE_DB: freshcart_source
+      SOURCE_USER: analytics_reader
+      SOURCE_PASSWORD: ${SOURCE_READER_PASSWORD}
+      DW_HOST: data-warehouse
+      DW_PORT: "5432"
+      DW_DB: freshcart_dw
+      DW_USER: ${DW_USER}
+      DW_PASSWORD: ${DW_PASSWORD}
+    depends_on:
+      source-db:
+        condition: service_healthy
+      data-warehouse:
+        condition: service_started
 
 volumes:
   source_db_data:
