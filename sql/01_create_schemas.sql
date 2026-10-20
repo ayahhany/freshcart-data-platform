@@ -1,0 +1,12 @@
+--  Bronze 
+CREATE SCHEMA IF NOT EXISTS bronze_app;
+CREATE SCHEMA IF NOT EXISTS bronze_suppliers;
+CREATE SCHEMA IF NOT EXISTS bronze_fx;
+
+-- Silver 
+CREATE SCHEMA IF NOT EXISTS silver_app;
+CREATE SCHEMA IF NOT EXISTS silver_suppliers;
+CREATE SCHEMA IF NOT EXISTS silver_fx;
+
+-- Gold 
+CREATE SCHEMA IF NOT EXISTS gold;
