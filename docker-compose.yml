@@ -70,7 +70,19 @@ services:
     restart: unless-stopped
 
 
-  # ---------------------------------------------------------------- YOUR PLATFORM STARTS HERE
+  # -------------------------------------------------------- YOUR PLATFORM STARTS HER
+  data-warehouse:
+    image: postgres:16
+    container_name: data-warehouse
+    environment:
+      POSTGRES_DB: freshcart_dw
+      POSTGRES_USER: ${DW_USER}
+      POSTGRES_PASSWORD: ${DW_PASSWORD}
+    ports:
+      - "5434:5432"
+    volumes:
+      - dw_data:/var/lib/postgresql/data
 
 volumes:
   source_db_data:
+  dw_data:
