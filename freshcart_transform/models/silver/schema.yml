@@ -1,0 +1,41 @@
+version: 2
+
+sources:
+  - name: bronze_fx
+    description: "Raw exchange rates data from API in Bronze layer"
+    database: freshcart_dw
+    schema: bronze_fx
+    tables:
+      - name: rates
+        description: "Raw rates table"
+
+  - name: bronze_suppliers
+    description: "Raw suppliers stock data in Bronze layer"
+    database: freshcart_dw
+    schema: bronze_suppliers
+    tables:
+      - name: general_stock
+        description: "Raw general stock table from supplier"
+      - name: fresh_stock
+        description: "Raw fresh stock table from supplier"
+
+models:
+  - name: fx_rates
+    description: "Cleaned and standardized exchange rates from API."
+    columns:
+      - name: rate_date
+        tests:
+          - not_null
+      - name: currency
+        tests:
+          - not_null
+
+  - name: suppliers
+    description: "Combined and cleaned supplier stock data handling schema drift."
+    columns:
+      - name: product_id
+        tests:
+          - not_null
+      - name: quantity_on_hand
+        tests:
+          - not_null
